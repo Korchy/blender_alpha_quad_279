@@ -1,2 +1,3 @@
-# blender_alpha_quad_279
-The Alpha Quad add-on for Blender 2.79
+# Alpha Quad for Blender 2.79
+
+Adaptation the Alpha Quad add-on for Blender 2.79
