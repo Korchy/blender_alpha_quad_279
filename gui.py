@@ -1,31 +1,19 @@
+# Nikita Akimov
+# interplanety@interplanety.org
+#
+# GitHub
+#   https://github.com/Korchy/blender_alpha_quad_279
 
-
-import bpy
-import bmesh
-# import blf
-# import bgl
-from mathutils import Matrix, Vector, Quaternion
-from mathutils import bvhtree
-from bpy_extras import view3d_utils
-# import gpu
-
-
-if not bpy.app.background:
-        import gpu,bgl,blf,gpu_extras
-
-from gpu_extras.batch import batch_for_shader
 import math
-from bpy.props import (
-    FloatProperty,
-    IntProperty,
-    BoolProperty,
-    EnumProperty,
-)
+import bpy
+from bpy_extras import view3d_utils
+if not bpy.app.background:
+    import gpu, bgl, blf
 
 
 
-shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
-shader2d = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+# shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+# shader2d = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
 
 handle3d = None
 handle3dtext = None
@@ -130,10 +118,15 @@ def draw_line(points, color, blend=False, smooth=False, width=1):
     if width != 1:
         bgl.glLineWidth(width)
 
-    shader.bind()
-    shader.uniform_float("color", color)
-    batch = batch_for_shader(shader, 'LINES', {"pos": points})
-    batch.draw(shader)
+    bgl.glColor4f(*color)
+    bgl.glBegin(bgl.GL_LINES)
+    bgl.glVertex3f(*points[0])
+    bgl.glVertex3f(*points[1])
+
+    # shader.bind()
+    # shader.uniform_float("color", color)
+    # batch = batch_for_shader(shader, 'LINES', {"pos": points})
+    # batch.draw(shader)
 
     bgl.glDisable(bgl.GL_BLEND)
     bgl.glDisable(bgl.GL_LINE_SMOOTH)
@@ -146,10 +139,19 @@ def draw_rect_callback(self, context):
     vertices = rects
     indices = ((0, 1, 2), (2, 1, 3))
 
-    shader2d.bind()
-    shader2d.uniform_float("color", (0, 0, 0, 0.3))
-    batch = batch_for_shader(shader2d, 'TRIS', {"pos": vertices}, indices=indices)
-    batch.draw(shader)
+    bgl.glEnable(bgl.GL_BLEND)
+    bgl.glColor4f(*(0, 0, 0, 0.3))
+    bgl.glBegin(bgl.GL_POLYGON)
+    for i in range(len(vertices)):
+        bgl.glVertex2f(vertices[i][0],vertices[i][1])
+        # bgl.glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2])
+    bgl.glEnd()
+    bgl.glDisable(bgl.GL_BLEND)
+
+    # shader2d.bind()
+    # shader2d.uniform_float("color", (0, 0, 0, 0.3))
+    # batch = batch_for_shader(shader2d, 'TRIS', {"pos": vertices}, indices=indices)
+    # batch.draw(shader)
 
 
 def draw_handle_add(arg):

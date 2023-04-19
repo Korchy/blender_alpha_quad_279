@@ -1,122 +1,19 @@
-# ##### BEGIN GPL LICENSE BLOCK #####
+# Nikita Akimov
+# interplanety@interplanety.org
 #
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software Foundation,
-#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-#
-# ##### END GPL LICENSE BLOCK #####
-# Created by Kushiro
+# GitHub
+#   https://github.com/Korchy/blender_alpha_quad_279
+
 
 import math
-
-from numpy.core.function_base import linspace
-from numpy.lib.function_base import average
+import mathutils
+from mathutils import Matrix, Vector
+import time
 import bpy
 import bmesh
-
-from mathutils import Matrix, Vector, Quaternion
-
-
-import mathutils
-import itertools
-
-
-import math
-from bpy.props import (
-    FloatProperty,
-    IntProperty,
-    BoolProperty,
-    EnumProperty,
-    FloatVectorProperty,
-)
-
-import pprint
-import time
-
+from bpy.props import FloatProperty, BoolProperty
 from . import gui
 
-
-
-# class Vert:
-#     def __init__(self) -> None:
-#         self.co = None
-#         self.plist = []
-#         self.move = Vector()
-#         self.boundary = False
-#         self.face_boundary = False
-#         self.links = []
-
-
-# class Vloop:
-#     def __init__(self, co=None) -> None:
-#         self.vert = None        
-#         self.next = None
-#         self.prev = None        
-#         if co != None:
-#             self.vert = Vert()
-#             self.vert.co = co
-
-#         self.ptype = ''
-#         self.v2 = None
-#         self.vk1 = None
-#         self.vk2 = None
-#         self.pv1 = None
-#         self.pv2 = None
-#         self.pvk1 = None
-#         self.pvk2 = None
-
-
-
-#     def angle(self):
-#         m1 = self.next.vert.co - self.vert.co
-#         m2 = self.prev.vert.co - self.vert.co
-#         if m1.length == 0 or m2.length == 0:
-#             return 0
-#         return m1.angle(m2)
-
-#     def link_next(self, v2):
-#         self.next = v2
-#         v2.prev = self
-
-#     def link_prev(self, v2):
-#         self.prev = v2
-#         v2.next = self
-
-#     def copy(self):
-#         vp = Vloop()
-#         vp.vert = self.vert
-#         return vp
-
-#     def copy_new(self):
-#         vp = Vloop(Vector())
-#         vp.vert.co = self.vert.co.copy()
-#         return vp        
-
-#     def is_concave(self, sn):
-#         m2 = self.vert.co - self.prev.vert.co
-#         c1 = m2.cross(sn)
-#         m1 = self.next.vert.co - self.vert.co
-
-#         if m1.cross(m2).length < 0.001:
-#             return False
-
-#         if c1.length == 0 or m1.length == 0:
-#             return False
-#         if c1.angle(m1) < math.radians(90):
-#             return True
-#         else:
-#             return False
-        
 
 class AlphaQuadOperator(bpy.types.Operator):
     """Tooltip"""
@@ -125,8 +22,7 @@ class AlphaQuadOperator(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     #, "GRAB_CURSOR", "BLOCKING"
 
-
-    prop_plen: FloatProperty(
+    prop_plen = FloatProperty(
         name="Quad size",
         description="Define the size of quad",
         default=0.4,
@@ -134,9 +30,7 @@ class AlphaQuadOperator(bpy.types.Operator):
         step=1,
     )    
 
-
-
-    prop_size_multiplier: FloatProperty(
+    prop_size_multiplier = FloatProperty(
         name="Size Multipler (auto reset)",
         description="Size Multipler for quad size",
         default=1.0,
@@ -144,14 +38,13 @@ class AlphaQuadOperator(bpy.types.Operator):
         min = 0.01,
     )    
 
-
-    prop_keep_edge: BoolProperty(
+    prop_keep_edge = BoolProperty(
         name="Keep sharp edge",
         description="Do not smooth the sharp edge",
         default=False,
     )    
 
-    prop_keep_edge_angle: FloatProperty(
+    prop_keep_edge_angle = FloatProperty(
         name="Edge Angle",
         description="Define the Edge Angle for keeping sharp edge",
         default=75,
@@ -160,14 +53,11 @@ class AlphaQuadOperator(bpy.types.Operator):
         step=10,
     )    
 
-
-
     def get_bm(self):
         obj = bpy.context.active_object
         me = obj.data
         bm = bmesh.from_edit_mesh(me)
         return bm
-
 
     def process(self, context):
         gui.lines = []
@@ -391,7 +281,8 @@ class AlphaQuadOperator(bpy.types.Operator):
                     f2 = bm.faces.new(vs)                
                     f2.normal_update()
         
-        bmesh.ops.delete(bm, geom=fs2, context='FACES')
+        # bmesh.ops.delete(bm, geom=fs2, context='FACES')
+        bmesh.ops.delete(bm, geom=fs2, context=2)   # 2 faces - ?
 
         remaining = set(bm.faces) - excluded
         esall2 = set()
@@ -1069,7 +960,7 @@ class AlphaQuadOperator(bpy.types.Operator):
         #return vm.inverted()
         fvm = {}
         for p in f1.loops:            
-            fvm[p] = vm @ p.vert.co
+            fvm[p] = vm * p.vert.co
         return fvm
 
 
@@ -1181,8 +1072,8 @@ class AlphaQuadOperator(bpy.types.Operator):
                 continue
             if p3.link_loop_next == p or p3.link_loop_next == p2:
                 continue
-            k1 = vm2 @ p3.vert.co
-            k2 = vm2 @ p3.link_loop_next.vert.co
+            k1 = vm2 * p3.vert.co
+            k2 = vm2 * p3.link_loop_next.vert.co
             ms.append(abs(k1.y))
             ms.append(abs(k2.y))
         return min(ms, key=lambda e:e)
@@ -1261,7 +1152,7 @@ class AlphaQuadOperator(bpy.types.Operator):
         m1 = p3.vert.co - p.vert.co
         vm = self.get_matrix(m1, sn.cross(m1), sn, p.vert.co)
         vm2 = vm.inverted()        
-        vp = vm2 @ pm.vert.co
+        vp = vm2 * pm.vert.co
         return vp.y < 0
 
 
@@ -1273,11 +1164,11 @@ class AlphaQuadOperator(bpy.types.Operator):
         vm = self.get_matrix(m1, sn.cross(m1), sn, p.vert.co)
         vm2 = vm.inverted()
         p3 = p.link_loop_next
-        vp = vm2 @ pm.vert.co
+        vp = vm2 * pm.vert.co
         deg = math.atan2(vp.y, vp.x)        
         if deg < 0:
             deg += math.radians(360)
-        vp2 = vm2 @ p3.vert.co
+        vp2 = vm2 * p3.vert.co
         deg2 = math.atan2(vp2.y, vp2.x)        
         if deg2 < 0:
             deg2 += math.radians(360)        
