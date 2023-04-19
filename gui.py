@@ -8,12 +8,8 @@ import math
 import bpy
 from bpy_extras import view3d_utils
 if not bpy.app.background:
-    import gpu, bgl, blf
+    import bgl, blf
 
-
-
-# shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
-# shader2d = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
 
 handle3d = None
 handle3dtext = None
@@ -24,7 +20,6 @@ lines2 = []
 txtall = []
 rects = []
 textpos = []
-
 
 
 def addline(p1, p2):
@@ -77,10 +72,9 @@ def draw_text_callback(self, context):
         off += sp
         draw_text( [left, top - off], p)    
 
-    for p in textpos:        
+    for p in textpos:
         #draw_text( [left, top - off], p)    
         draw_text_adv(p)    
-
 
 
 def draw_text_adv(pam):
@@ -106,7 +100,6 @@ def draw_text(pos, text):
     blf.draw(font_id, text)
 
 
-    
 def draw_line(points, color, blend=False, smooth=False, width=1):
     global shader
 
@@ -131,7 +124,6 @@ def draw_line(points, color, blend=False, smooth=False, width=1):
     bgl.glDisable(bgl.GL_BLEND)
     bgl.glDisable(bgl.GL_LINE_SMOOTH)
     bgl.glLineWidth(1)   
-
 
 def draw_rect_callback(self, context):
     global rects
